@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Buy me a coffee</title>
+<meta name="description" content="Tip jar for the servers and dev utilities I keep running.">
+<meta name="theme-color" content="#0b0f14">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230b0f14'/><text x='6' y='23' font-family='monospace' font-size='18' fill='%23ff5f56'>$_</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f6f7f4;
+    --surface: #ffffff;
+    --surface-2: #eef0ec;
+    --border: #dde1da;
+    --text: #151a16;
+    --muted: #5d665f;
+    --accent: #138a4b;
+    --accent-ink: #ffffff;
+    --prompt: #138a4b;
+    --ember: #d93a3f;
+    --path: #0b62c7;
+    --shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06);
+    --qr-bg: #ffffff;
+    --radius: 14px;
+    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0b0f14;
+      --surface: #11171e;
+      --surface-2: #17202a;
+      --border: #222d38;
+      --text: #e6edf3;
+      --muted: #8b98a5;
+      --accent: #3ddc84;
+      --accent-ink: #06210f;
+      --prompt: #3ddc84;
+      --ember: #ff5f56;
+      --path: #58a6ff;
+      --shadow: 0 1px 0 rgba(255,255,255,.03) inset, 0 12px 32px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0b0f14;
+    --surface: #11171e;
+    --surface-2: #17202a;
+    --border: #222d38;
+    --text: #e6edf3;
+    --muted: #8b98a5;
+    --accent: #3ddc84;
+    --accent-ink: #06210f;
+    --prompt: #3ddc84;
+    --ember: #ff5f56;
+    --path: #58a6ff;
+    --shadow: 0 1px 0 rgba(255,255,255,.03) inset, 0 12px 32px rgba(0,0,0,.35);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+  button { font: inherit; color: inherit; }
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+
+  .wrap {
+    width: 100%;
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 28px 16px 40px;
+    flex: 1;
+  }
+
+  /* ---------- top bar ---------- */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: var(--mono); font-size: 13px; color: var(--muted);
+    margin-bottom: 36px;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; font-weight: 700; }
+  .status { display: inline-flex; align-items: center; gap: 8px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); animation: pulse 2.4s ease-in-out infinite; }
+  @keyframes pulse { 50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 0%, transparent); } }
+  .theme-btn {
+    background: none; border: 1px solid var(--border); border-radius: 8px;
+    width: 32px; height: 32px; display: grid; place-items: center; cursor: pointer; color: var(--muted);
+    margin-left: 12px;
+  }
+  .theme-btn:hover { color: var(--text); }
+  .topbar-right { display: flex; align-items: center; }
+
+  /* ---------- hero ---------- */
+  .term {
+    display: flex; align-items: center;
+    margin: 0;
+    padding: .7em .9em;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    font-family: var(--mono);
+    font-size: clamp(18px, 3.4vw, 28px);
+    font-weight: 500;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .term .path { color: var(--path); font-weight: 700; }
+  .term .sig  { color: var(--muted); margin: 0 .5em 0 .1em; }
+  .term .cmd  { color: var(--text); font-weight: 700; }
+  .brand .red { color: var(--ember); }
+  .cursor.typing { animation: none; }
+  .cursor { display: inline-block; width: .55em; height: 1.1em; background: var(--accent); margin-left: 2px; flex: none; animation: blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* ---------- tip panel ---------- */
+  .panel {
+    margin-top: 36px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .panel-head {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+    font-family: var(--mono); font-size: 12px; color: var(--muted);
+  }
+  .lights { display: flex; gap: 6px; margin-right: 6px; }
+  .lights i { width: 10px; height: 10px; border-radius: 50%; background: var(--border); display: block; }
+  .panel-body { display: grid; grid-template-columns: 240px 1fr; min-height: 420px; }
+
+  .methods {
+    list-style: none; margin: 0; padding: 10px;
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .method-btn {
+    width: 100%; display: flex; align-items: center; gap: 12px;
+    padding: 11px 12px; border-radius: 10px;
+    background: none; border: 1px solid transparent; cursor: pointer; text-align: left;
+    transition: background .15s, border-color .15s;
+  }
+  .method-btn:hover { background: var(--surface-2); }
+  .method-btn[aria-selected="true"] { background: var(--surface-2); border-color: var(--border); }
+  .method-btn[aria-selected="true"] .m-name::before { content: "> "; color: var(--accent); }
+  .m-logo {
+    width: 30px; height: 30px; border-radius: 8px; flex: none;
+    display: grid; place-items: center;
+    font-family: var(--mono); font-weight: 700; font-size: 12px; color: #fff;
+    background: var(--brand);
+  }
+  .m-text { display: flex; flex-direction: column; min-width: 0; }
+  .m-name { font-family: var(--mono); font-size: 14px; font-weight: 500; }
+  .m-sub { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .detail { padding: 28px; display: flex; gap: 28px; align-items: flex-start; }
+  .qr-card {
+    flex: none; width: 240px;
+    background: var(--qr-bg);
+    border-radius: 12px; padding: 14px;
+    border: 1px solid var(--border);
+    position: relative;
+  }
+  .qr-card img, .qr-card svg { display: block; width: 100%; height: auto; aspect-ratio: 1; border-radius: 4px; image-rendering: pixelated; }
+  .qr-tag {
+    position: absolute; top: -10px; left: 12px;
+    font-family: var(--mono); font-size: 11px; font-weight: 700;
+    background: var(--brand); color: #fff; padding: 2px 8px; border-radius: 6px;
+  }
+  .info { flex: 1; min-width: 0; }
+  .info h2 { font-family: var(--mono); font-size: 22px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .info .desc { color: var(--muted); margin: 0 0 20px; font-size: 14px; }
+
+  .fields { margin: 0 0 22px; display: grid; gap: 10px; }
+  .field {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 9px 10px 9px 12px;
+  }
+  .field dt { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .field dd { margin: 0; font-family: var(--mono); font-size: 14px; word-break: break-all; }
+  .copy-btn {
+    flex: none; background: none; border: 1px solid var(--border); border-radius: 7px;
+    font-family: var(--mono); font-size: 12px; padding: 5px 9px; cursor: pointer; color: var(--muted);
+  }
+  .copy-btn:hover { color: var(--text); border-color: var(--muted); }
+  .copy-btn.ok { color: var(--accent); border-color: var(--accent); }
+
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 11px 16px; border-radius: 10px;
+    font-family: var(--mono); font-size: 14px; font-weight: 500;
+    text-decoration: none; cursor: pointer; border: 1px solid var(--border);
+    background: var(--surface); transition: transform .1s, background .15s;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn:hover { background: var(--surface-2); }
+  .btn-primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .btn-primary:hover { background: color-mix(in srgb, var(--accent) 88%, var(--text)); }
+  .btn svg { width: 16px; height: 16px; }
+
+  .hint { margin-top: 18px; font-size: 12px; color: var(--muted); font-family: var(--mono); }
+  .hint b { color: var(--text); font-weight: 500; }
+
+  footer {
+    text-align: center; font-family: var(--mono); font-size: 12px; color: var(--muted);
+    padding: 24px 16px 32px;
+  }
+  footer .heart { color: var(--ember); }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px);
+    background: var(--text); color: var(--bg);
+    font-family: var(--mono); font-size: 13px;
+    padding: 9px 14px; border-radius: 9px; opacity: 0; pointer-events: none;
+    transition: opacity .2s, transform .2s;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  /* ---------- mobile ---------- */
+  @media (max-width: 720px) {
+    .wrap { padding-top: 18px; }
+    .topbar { margin-bottom: 26px; }
+    .topbar { font-size: 12px; }
+    .theme-btn { margin-left: 10px; }
+    .panel { margin-top: 26px; }
+    .panel-body { grid-template-columns: 1fr; min-height: 0; }
+    .methods {
+      flex-direction: row; overflow-x: auto; gap: 6px;
+      border-right: none; border-bottom: 1px solid var(--border);
+      scroll-snap-type: x mandatory; scrollbar-width: none;
+    }
+    .methods::-webkit-scrollbar { display: none; }
+    .methods li { flex: none; scroll-snap-align: start; }
+    .method-btn { padding: 8px 12px 8px 8px; gap: 8px; }
+    .method-btn[aria-selected="true"] .m-name::before { content: ""; }
+    .method-btn[aria-selected="true"] { border-color: var(--accent); }
+    .m-logo { width: 26px; height: 26px; font-size: 11px; }
+    .m-sub { display: none; }
+    .detail { flex-direction: column; align-items: stretch; padding: 22px 16px; gap: 22px; }
+    .qr-card { width: min(100%, 300px); margin: 0 auto; }
+    .info h2 { text-align: center; }
+    .info .desc { text-align: center; }
+    .actions .btn { flex: 1 1 140px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dot, .cursor { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<main class="wrap">
+  <header class="topbar">
+    <a class="brand" href="#">
+      <span>benburns<span class="red">red</span></span>
+    </a>
+    <div class="topbar-right">
+      <span class="status"><span class="dot" aria-hidden="true"></span><span class="status-text">puyat pero online</span></span>
+      <button class="theme-btn" id="themeBtn" aria-label="Toggle theme" title="Toggle theme">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1 class="term" aria-label="buy me a coffee"><span class="path" aria-hidden="true">~</span><span class="sig" aria-hidden="true">$</span><span class="cmd" aria-hidden="true">buy-me-a-<span id="drink">coffee</span></span><span class="cursor" aria-hidden="true"></span></h1>
+  </section>
+
+  <section class="panel" aria-label="Tip options">
+    <div class="panel-head">
+      <span class="lights" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span id="cmdline">tip --via gcash</span>
+    </div>
+    <div class="panel-body">
+      <ul class="methods" id="methods" role="tablist" aria-label="Payment method"></ul>
+      <div class="detail" id="detail" role="tabpanel" aria-live="polite"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  made with <span class="heart">♥</span> and too much coffee · salamat!
+</footer>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* ============================================================
+   EDIT HERE — payment methods.
+   qr:    path to the QR image (e.g. "qr/gcash.png"), or null for a placeholder
+   link:  payment URL (optional) — shows an "Open" button
+   fields: shown with copy buttons
+   ============================================================ */
+const METHODS = [
+  {
+    id: "gcash", name: "GCash", short: "G", brand: "#0a5cff",
+    sub: "InstaPay QR · e-wallet",
+    desc: "Scan with GCash or any QR Ph–enabled bank app.",
+    qr: null, link: null,
+    fields: [["Name", "J*** D***"], ["Number", "0917 XXX XXXX"]],
+  },
+  {
+    id: "maribank", name: "MariBank", short: "M", brand: "#ee4d2d",
+    sub: "InstaPay QR · digital bank",
+    desc: "Scan with MariBank or any QR Ph–enabled bank app.",
+    qr: null, link: null,
+    fields: [["Name", "J*** D***"], ["Account", "XXXX XXXX XXXX"]],
+  },
+  {
+    id: "bpi", name: "BPI", short: "BPI", brand: "#b11116",
+    sub: "InstaPay QR · bank transfer",
+    desc: "Scan with BPI or any QR Ph–enabled bank app.",
+    qr: null, link: null,
+    fields: [["Name", "J*** D***"], ["Account", "XXXX XXXX XX"]],
+  },
+  {
+    id: "paypal", name: "PayPal", short: "P", brand: "#003087",
+    sub: "International · cards",
+    desc: "Best for tips from outside the Philippines.",
+    qr: null, link: "https://paypal.me/your-handle",
+    fields: [["paypal.me", "your-handle"]],
+  },
+  {
+    id: "wise", name: "Wise", short: "W", brand: "#163300",
+    sub: "International · low fees",
+    desc: "Send from almost any currency with low fees.",
+    qr: null, link: "https://wise.com/pay/me/your-handle",
+    fields: [["Wisetag", "@your-handle"]],
+  },
+];
+/* ============================================================ */
+
+const $ = (s) => document.querySelector(s);
+const methodsEl = $("#methods"), detailEl = $("#detail"), cmdEl = $("#cmdline"), toastEl = $("#toast");
+
+const ICON = {
+  download: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg>',
+  open: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>',
+};
+
+// Deterministic fake QR so the prototype looks real before the actual codes are added.
+function placeholderQR(seed, color) {
+  const n = 29, cells = [];
+  let h = 0; for (const c of seed) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  const rnd = () => ((h = (h * 1664525 + 1013904223) >>> 0) / 2 ** 32);
+  const inFinder = (x, y) => [[0,0],[n-7,0],[0,n-7]].some(([fx,fy]) => x >= fx-1 && x <= fx+7 && y >= fy-1 && y <= fy+7);
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++)
+    if (!inFinder(x, y) && rnd() > 0.52) cells.push(`M${x} ${y}h1v1h-1z`);
+  const finder = (fx, fy) =>
+    `<path d="M${fx} ${fy}h7v7h-7zM${fx+1} ${fy+1}v5h5v-5z" fill-rule="evenodd"/><rect x="${fx+2}" y="${fy+2}" width="3" height="3"/>`;
+  const q = 4, s = n + q * 2;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-q} ${-q} ${s} ${s}" shape-rendering="crispEdges">` +
+    `<rect x="${-q}" y="${-q}" width="${s}" height="${s}" fill="#fff"/>` +
+    `<g fill="#111">${finder(0,0)}${finder(n-7,0)}${finder(0,n-7)}<path d="${cells.join("")}"/></g>` +
+    `<rect x="${n/2-3.5}" y="${n/2-3.5}" width="7" height="7" rx="1.5" fill="#fff"/>` +
+    `<rect x="${n/2-2.5}" y="${n/2-2.5}" width="5" height="5" rx="1" fill="${color}"/>` +
+    `</svg>`;
+}
+
+function renderList() {
+  methodsEl.innerHTML = METHODS.map((m) => `
+    <li role="presentation">
+      <button class="method-btn" role="tab" id="tab-${m.id}" data-id="${m.id}" aria-selected="false" style="--brand:${m.brand}">
+        <span class="m-logo">${m.short}</span>
+        <span class="m-text"><span class="m-name">${m.name}</span><span class="m-sub">${m.sub}</span></span>
+      </button>
+    </li>`).join("");
+  methodsEl.addEventListener("click", (e) => {
+    const b = e.target.closest(".method-btn");
+    if (b) select(b.dataset.id, true);
+  });
+  methodsEl.addEventListener("keydown", (e) => {
+    if (!["ArrowDown","ArrowUp","ArrowLeft","ArrowRight"].includes(e.key)) return;
+    e.preventDefault();
+    const i = METHODS.findIndex((m) => m.id === current.id);
+    const d = e.key === "ArrowDown" || e.key === "ArrowRight" ? 1 : -1;
+    const next = METHODS[(i + d + METHODS.length) % METHODS.length];
+    select(next.id, true); $(`#tab-${next.id}`).focus();
+  });
+}
+
+let current;
+function select(id, push) {
+  current = METHODS.find((m) => m.id === id) || METHODS[0];
+  document.querySelectorAll(".method-btn").forEach((b) => {
+    const on = b.dataset.id === current.id;
+    b.setAttribute("aria-selected", on);
+    b.tabIndex = on ? 0 : -1;
+    if (on && push) b.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
+  });
+  cmdEl.textContent = `tip --via ${current.id}`;
+  if (push) history.replaceState(null, "", `#${current.id}`);
+
+  const m = current;
+  const qrMarkup = m.qr
+    ? `<img src="${m.qr}" alt="${m.name} QR code" width="240" height="240">`
+    : placeholderQR(m.id, m.brand);
+
+  detailEl.innerHTML = `
+    <div class="qr-card" style="--brand:${m.brand}">
+      <span class="qr-tag">${m.name}</span>
+      ${qrMarkup}
+    </div>
+    <div class="info">
+      <h2>${m.name}</h2>
+      <p class="desc">${m.desc}</p>
+      <dl class="fields">
+        ${m.fields.map(([k, v]) => `
+          <div class="field">
+            <div><dt>${k}</dt><dd>${v}</dd></div>
+            <button class="copy-btn" data-copy="${v}">copy</button>
+          </div>`).join("")}
+      </dl>
+      <div class="actions">
+        <button class="btn btn-primary" id="dlBtn">${ICON.download} Save QR</button>
+        ${m.link ? `<a class="btn" href="${m.link}" target="_blank" rel="noopener">${ICON.open} Open ${m.name}</a>` : ""}
+      </div>
+      <p class="hint">tip: on mobile, <b>Save QR</b> then upload it from your ${m.link ? "app" : "bank / e-wallet"}'s <b>Scan → Upload QR</b>.</p>
+    </div>`;
+
+  $("#dlBtn").addEventListener("click", saveQR);
+  detailEl.querySelectorAll(".copy-btn").forEach((b) =>
+    b.addEventListener("click", () => copy(b.dataset.copy, b)));
+}
+
+async function qrBlob(m) {
+  if (m.qr) return (await fetch(m.qr)).blob();
+  // Rasterize the placeholder SVG to PNG so it behaves like a real QR image.
+  const svg = new Blob([placeholderQR(m.id, m.brand)], { type: "image/svg+xml" });
+  const url = URL.createObjectURL(svg);
+  const img = new Image(); img.src = url; await img.decode();
+  const c = document.createElement("canvas"); c.width = c.height = 1024;
+  const ctx = c.getContext("2d"); ctx.imageSmoothingEnabled = false; ctx.drawImage(img, 0, 0, 1024, 1024);
+  URL.revokeObjectURL(url);
+  return new Promise((r) => c.toBlob(r, "image/png"));
+}
+
+async function saveQR() {
+  const m = current;
+  try {
+    const blob = await qrBlob(m);
+    const ext = (blob.type.split("/")[1] || "png").replace("svg+xml", "svg").replace("jpeg", "jpg");
+    const name = `tip-${m.id}-qr.${ext}`;
+    const file = new File([blob], name, { type: blob.type });
+    // On phones, the share sheet offers "Save Image" straight to Photos.
+    const touch = matchMedia("(pointer: coarse)").matches;
+    if (touch && navigator.canShare?.({ files: [file] })) {
+      await navigator.share({ files: [file], title: `${m.name} QR` });
+      return;
+    }
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    toast(`saved ${name}`);
+  } catch (e) {
+    if (e.name !== "AbortError") toast("couldn't save — long-press the QR instead");
+  }
+}
+
+async function copy(text, btn) {
+  try {
+    await navigator.clipboard.writeText(text.replace(/\s+/g, " ").trim());
+    btn.textContent = "copied"; btn.classList.add("ok");
+    setTimeout(() => { btn.textContent = "copy"; btn.classList.remove("ok"); }, 1400);
+  } catch { toast("copy failed"); }
+}
+
+let toastT;
+function toast(msg) {
+  toastEl.textContent = msg; toastEl.classList.add("show");
+  clearTimeout(toastT); toastT = setTimeout(() => toastEl.classList.remove("show"), 2000);
+}
+
+// Theme toggle (remembered per browser).
+const root = document.documentElement;
+try { const t = localStorage.getItem("theme"); if (t) root.dataset.theme = t; } catch {}
+$("#themeBtn").addEventListener("click", () => {
+  root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
+  try { localStorage.setItem("theme", root.dataset.theme); } catch {}
+});
+
+// Hero: erase the drink and type the next one, forever.
+(function typeDrinks() {
+  const term = $(".term"), el = $("#drink"), cur = $(".cursor");
+  const drinks = ["coffee", "boba", "biru", "stresstab"];
+  const MAX_PX = 28;
+
+  // Size the prompt so the longest word still fits on one line.
+  function fit() {
+    const probe = term.cloneNode(true);
+    probe.querySelector("#drink").removeAttribute("id");
+    probe.querySelector(".cmd span").textContent = drinks.reduce((a, b) => (b.length > a.length ? b : a));
+    Object.assign(probe.style, { position: "absolute", visibility: "hidden", width: "auto", fontSize: "100px" });
+    document.body.appendChild(probe);
+    const needed = probe.getBoundingClientRect().width;
+    probe.remove();
+    term.style.fontSize = Math.min(MAX_PX, (100 * term.getBoundingClientRect().width * 0.98) / needed) + "px";
+  }
+  fit();
+  new ResizeObserver(fit).observe(term.parentElement);
+  document.fonts?.ready.then(fit);
+
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  let i = 0;
+  (async () => {
+    for (;;) {
+      await sleep(2200);                       // hold the word
+      cur.classList.add("typing");
+      while (el.textContent) { el.textContent = el.textContent.slice(0, -1); await sleep(70); }
+      await sleep(350);
+      const next = drinks[i = (i + 1) % drinks.length];
+      for (const ch of next) { el.textContent += ch; await sleep(110 + Math.random() * 60); }
+      cur.classList.remove("typing");
+    }
+  })();
+})();
+
+renderList();
+select(location.hash.slice(1), false);
+window.addEventListener("hashchange", () => select(location.hash.slice(1), false));
+</script>
+</body>
+</html>
