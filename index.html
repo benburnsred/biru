@@ -316,36 +316,15 @@ const METHODS = [
     id: "gcash", name: "GCash", short: "G", brand: "#0a5cff",
     sub: "InstaPay QR · e-wallet",
     desc: "Scan with GCash or any QR Ph–enabled bank app.",
-    qr: null, link: null,
-    fields: [["Name", "J*** D***"], ["Number", "0917 XXX XXXX"]],
-  },
-  {
-    id: "maribank", name: "MariBank", short: "M", brand: "#ee4d2d",
-    sub: "InstaPay QR · digital bank",
-    desc: "Scan with MariBank or any QR Ph–enabled bank app.",
-    qr: null, link: null,
-    fields: [["Name", "J*** D***"], ["Account", "XXXX XXXX XXXX"]],
+    qr: "qr/gcash.png", link: null,
+    fields: [],
   },
   {
     id: "bpi", name: "BPI", short: "BPI", brand: "#b11116",
     sub: "InstaPay QR · bank transfer",
     desc: "Scan with BPI or any QR Ph–enabled bank app.",
-    qr: null, link: null,
-    fields: [["Name", "J*** D***"], ["Account", "XXXX XXXX XX"]],
-  },
-  {
-    id: "paypal", name: "PayPal", short: "P", brand: "#003087",
-    sub: "International · cards",
-    desc: "Best for tips from outside the Philippines.",
-    qr: null, link: "https://paypal.me/your-handle",
-    fields: [["paypal.me", "your-handle"]],
-  },
-  {
-    id: "wise", name: "Wise", short: "W", brand: "#163300",
-    sub: "International · low fees",
-    desc: "Send from almost any currency with low fees.",
-    qr: null, link: "https://wise.com/pay/me/your-handle",
-    fields: [["Wisetag", "@your-handle"]],
+    qr: "qr/bpi.png", link: null,
+    fields: [],
   },
 ];
 /* ============================================================ */
@@ -424,13 +403,13 @@ function select(id, push) {
     <div class="info">
       <h2>${m.name}</h2>
       <p class="desc">${m.desc}</p>
-      <dl class="fields">
+      ${m.fields.length ? `<dl class="fields">
         ${m.fields.map(([k, v]) => `
           <div class="field">
             <div><dt>${k}</dt><dd>${v}</dd></div>
             <button class="copy-btn" data-copy="${v}">copy</button>
           </div>`).join("")}
-      </dl>
+      </dl>` : ""}
       <div class="actions">
         <button class="btn btn-primary" id="dlBtn">${ICON.download} Save QR</button>
         ${m.link ? `<a class="btn" href="${m.link}" target="_blank" rel="noopener">${ICON.open} Open ${m.name}</a>` : ""}
